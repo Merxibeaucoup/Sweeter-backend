@@ -1,12 +1,12 @@
 package com.edgar.sweeter.services;
 
-import java.util.Random;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.edgar.sweeter.exceptions.EmailAlreadyTakenException;
+import com.edgar.sweeter.exceptions.UserDoesNotExistException;
 import com.edgar.sweeter.models.AppUser;
 import com.edgar.sweeter.models.RegistrationObject;
 import com.edgar.sweeter.models.Role;
@@ -23,6 +23,31 @@ public class UserService {
 	@Autowired
 	private  RoleRepository roleRepo;
 	
+	
+	
+	/* get User by name*/
+	public AppUser getUserByUsername(String username) {
+		return userRepo.findByUsername(username).orElseThrow(UserDoesNotExistException::new);
+		
+	}
+	
+	
+	
+	/* update User*/	
+	public AppUser updateUser(AppUser user) {
+		
+		try {
+			return userRepo.save(user);
+		}
+		catch(Exception e) {
+			
+			throw new EmailAlreadyTakenException();
+			
+		}
+		
+	}
+	
+	/* Register User*/
 	public AppUser RegisterUser(RegistrationObject ro) {
 		
 		AppUser user = new AppUser();
@@ -73,6 +98,8 @@ public class UserService {
 		
 	}
 	
+	
+	/* generate Username*/
 	private String generateUsername(String name) {
 		
 		long generatedNumber = (long)Math.floor(Math.random() * 1_000_000_000);
