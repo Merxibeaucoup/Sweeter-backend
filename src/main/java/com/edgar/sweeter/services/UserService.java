@@ -99,6 +99,26 @@ public class UserService {
 	}
 	
 	
+	
+	
+	public void generateEmailVerification(String username) {
+		AppUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistException::new);
+		
+		user.setVerification(generateVerificationNumber());
+		
+		userRepo.save(user);
+		
+	}
+	
+	
+	
+	private Long generateVerificationNumber() {
+		// TODO Auto-generated method stub
+		return  (long)Math.floor(Math.random() * 100_000_000);
+	}
+
+
+
 	/* generate Username*/
 	private String generateUsername(String name) {
 		
@@ -106,6 +126,10 @@ public class UserService {
 	return	  name + generatedNumber;
 	
 	}
+
+
+
+	
 	
 /*	
  * pickWord() +

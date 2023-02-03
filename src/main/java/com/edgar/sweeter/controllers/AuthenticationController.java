@@ -44,7 +44,9 @@ public class AuthenticationController {
 		return new ResponseEntity<String>("The User you are looking for doesnt exist",HttpStatus.NOT_FOUND);
 		
 	}
-	
+	/*
+	 * 
+	 * */
 	
 	@PutMapping("/update/phone")
 	public AppUser updatePhoneNumber(@RequestBody LinkedHashMap<String, String> body) {
@@ -52,11 +54,20 @@ public class AuthenticationController {
 		String username =  body.get("username");
 		String phone = body.get("phone");
 		
+		
 		AppUser user = userSevice.getUserByUsername(username);
 		
 		user.setPhone(phone);
 		
 		return userSevice.updateUser(user);
+	}
+	
+	@PostMapping("/email/code")
+	public ResponseEntity<String> createEmailVerification(@RequestBody LinkedHashMap<String, String> body ){
+		
+		userSevice.generateEmailVerification(body.get("username"));
+		
+		return new ResponseEntity<String>("verification code generated, email sent", HttpStatus.OK);
 	}
 
 }

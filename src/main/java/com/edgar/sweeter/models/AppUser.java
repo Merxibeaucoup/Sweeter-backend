@@ -58,9 +58,20 @@ public class AppUser {
 			)
 	private Set<Role> authorities;
 	
+	private Boolean enabled;
+	
+	@Column(nullable = true)
+	@JsonIgnore
+	private Long verification;
+	
 	
 	public AppUser() {
+		
+		/*to avoid assigning duplicates*/
 		this.authorities = new HashSet<>();
+		
+		/*user cant use account until email is verified*/
+		this.enabled = false;
 		
 	}
 
@@ -155,17 +166,39 @@ public class AppUser {
 	}
 
 
+	public Boolean getEnabled() {
+		return enabled;
+	}
+
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
+
+	public Long getVerification() {
+		return verification;
+	}
+
+
+	public void setVerification(Long verification) {
+		this.verification = verification;
+	}
+
+
 	@Override
 	public String toString() {
 		return "AppUser [userId=" + userId + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email
 				+ ", phone=" + phone + ", dateOfBirth=" + dateOfBirth + ", username=" + username + ", password="
-				+ password + ", authorities=" + authorities + "]";
+				+ password + ", authorities=" + authorities + ", enabled=" + enabled + ", verification=" + verification
+				+ "]";
 	}
 
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(authorities, dateOfBirth, email, firstName, lastName, password, phone, userId, username);
+		return Objects.hash(authorities, dateOfBirth, email, enabled, firstName, lastName, password, phone, userId,
+				username, verification);
 	}
 
 
@@ -179,15 +212,14 @@ public class AppUser {
 			return false;
 		AppUser other = (AppUser) obj;
 		return Objects.equals(authorities, other.authorities) && Objects.equals(dateOfBirth, other.dateOfBirth)
-				&& Objects.equals(email, other.email) && Objects.equals(firstName, other.firstName)
-				&& Objects.equals(lastName, other.lastName) && Objects.equals(password, other.password)
-				&& Objects.equals(phone, other.phone) && Objects.equals(userId, other.userId)
-				&& Objects.equals(username, other.username);
+				&& Objects.equals(email, other.email) && Objects.equals(enabled, other.enabled)
+				&& Objects.equals(firstName, other.firstName) && Objects.equals(lastName, other.lastName)
+				&& Objects.equals(password, other.password) && Objects.equals(phone, other.phone)
+				&& Objects.equals(userId, other.userId) && Objects.equals(username, other.username)
+				&& Objects.equals(verification, other.verification);
 	}
-	
-	
-	
-	
+
+
 	
 	
 
