@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.edgar.sweeter.exceptions.EmailAlreadyTakenException;
+import com.edgar.sweeter.exceptions.EmailFailedToSendException;
 import com.edgar.sweeter.exceptions.UserDoesNotExistException;
 import com.edgar.sweeter.models.AppUser;
 import com.edgar.sweeter.models.RegistrationObject;
@@ -60,6 +61,14 @@ public class AuthenticationController {
 		user.setPhone(phone);
 		
 		return userSevice.updateUser(user);
+		
+	}
+	
+	
+	
+	@ExceptionHandler({EmailFailedToSendException.class})
+	public ResponseEntity<String>handleFailedEmail(){	
+		return new ResponseEntity<String>("Email failed to send try again in a moment", HttpStatus.INTERNAL_SERVER_ERROR);	
 	}
 	
 	@PostMapping("/email/code")

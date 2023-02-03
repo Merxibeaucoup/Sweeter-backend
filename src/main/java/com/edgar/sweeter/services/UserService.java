@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.edgar.sweeter.exceptions.EmailAlreadyTakenException;
+import com.edgar.sweeter.exceptions.EmailFailedToSendException;
 import com.edgar.sweeter.exceptions.UserDoesNotExistException;
 import com.edgar.sweeter.models.AppUser;
 import com.edgar.sweeter.models.RegistrationObject;
@@ -22,6 +23,9 @@ public class UserService {
 	
 	@Autowired
 	private  RoleRepository roleRepo;
+	
+	@Autowired
+	private MailService mailService;
 	
 	
 	
@@ -105,6 +109,15 @@ public class UserService {
 		AppUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistException::new);
 		
 		user.setVerification(generateVerificationNumber());
+		
+		try {
+			mailService.sendEmail(user.getEmail(), "Your Verification code ", "Here is your verification code:"+ user.getVerification());
+			userRepo.save(user);
+			
+		} catch (Exception e) {
+			
+			throw new EmailFailedToSendException();
+		}
 		
 		userRepo.save(user);
 		
