@@ -66,13 +66,13 @@ public class MailConfiguration {
 	
 	@Bean
 	public Gmail getService() {
-		NetHttpTransport HTTP_Transport;
+		NetHttpTransport HTTP_TRANSPORT;
 		
 		try {
 			
-			HTTP_Transport = GoogleNetHttpTransport.newTrustedTransport();
+			HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 			
-			return new Gmail.Builder(HTTP_Transport, JSON_FACTORY, getCredentials(HTTP_Transport))
+			return new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
 					.setApplicationName(APPLICATION_NAME)
 					.build();
 		

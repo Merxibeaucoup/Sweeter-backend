@@ -3,26 +3,30 @@ package com.edgar.sweeter.services;
 import java.io.ByteArrayOutputStream;
 import java.util.Properties;
 
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.edgar.sweeter.exceptions.EmailFailedToSendException;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 
-@Service
+import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+
+@Service 
 public class MailService {
+	
 	
 	@Autowired
 	private  Gmail gmail;
 	
-	public void sendEmail(String toAddress, String subject, String content) throws Exception{
-		Properties props = new Properties();
+	
+	public void sendEmail(String toAddress, String subject, String content) throws Exception {
+		
+		Properties props =  new Properties();
 		
 		Session session = Session.getInstance(props, null);
 		
@@ -30,7 +34,7 @@ public class MailService {
 		
 		try {
 			email.setFrom(new InternetAddress("edgarbriandt@gmail.com"));
-			email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(toAddress));
+			email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(toAddress));
 			email.setSubject(subject);
 			email.setText(content);
 			
@@ -46,13 +50,14 @@ public class MailService {
 			message.setRaw(encodedEmail);
 			
 			message = gmail.users().messages().send("me", message).execute();
-		}
-		
-		catch(Exception e){
+		}catch(GoogleJsonResponseException e) {
+			GoogleJsonError error = e.getDetails();
 			
-			throw new EmailFailedToSendException();
-		}
+			if(error.getCode()== 403) {
+				throw e;
+			}
 			
+		}
 	}
-
+	
 }
