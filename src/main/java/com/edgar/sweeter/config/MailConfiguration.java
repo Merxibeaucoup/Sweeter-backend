@@ -27,7 +27,7 @@ import com.google.api.services.gmail.GmailScopes;
 @Configuration
 public class MailConfiguration {
 	
-	private static final String APPLICATION_NAME="Sweeter";
+	private static final String APPLICATION_NAME="Fwitter";
 	
 	private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 	

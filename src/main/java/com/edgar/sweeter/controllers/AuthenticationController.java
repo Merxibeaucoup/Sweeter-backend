@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.edgar.sweeter.exceptions.EmailAlreadyTakenException;
 import com.edgar.sweeter.exceptions.EmailFailedToSendException;
+import com.edgar.sweeter.exceptions.IncorrectVerificationCodeException;
 import com.edgar.sweeter.exceptions.UserDoesNotExistException;
 import com.edgar.sweeter.models.AppUser;
 import com.edgar.sweeter.models.RegistrationObject;
@@ -25,6 +27,9 @@ public class AuthenticationController {
 
 	@Autowired
 	private UserService userSevice;
+	
+	
+	/*  Register User and Exception handler**/
 
 	@ExceptionHandler({ EmailAlreadyTakenException.class })
 	public ResponseEntity<String> handleEmailTaken() {
@@ -38,6 +43,8 @@ public class AuthenticationController {
 
 	}
 	
+	/*  Update Phone Number and Exception handler**/
+	
 	
 	@ExceptionHandler({UserDoesNotExistException.class})
 	public ResponseEntity<String> handleUserDoesntExist(){
@@ -45,9 +52,7 @@ public class AuthenticationController {
 		return new ResponseEntity<String>("The User you are looking for doesnt exist",HttpStatus.NOT_FOUND);
 		
 	}
-	/*
-	 * 
-	 * */
+	
 	
 	@PutMapping("/update/phone")
 	public AppUser updatePhoneNumber(@RequestBody LinkedHashMap<String, String> body) {
@@ -64,6 +69,8 @@ public class AuthenticationController {
 		
 	}
 	
+	/*  Email verification code creation and Exception handler **/
+	
 	
 	
 	@ExceptionHandler({EmailFailedToSendException.class})
@@ -78,5 +85,42 @@ public class AuthenticationController {
 		
 		return new ResponseEntity<String>("verification code generated, email sent", HttpStatus.OK);
 	}
+	
+	
+	
+	/*  Email verification and Exception handler **/
+	
+	
+	@ExceptionHandler({IncorrectVerificationCodeException.class})
+	public ResponseEntity<String> handleIncorrectCode(){		
+		return new ResponseEntity<String>("The code provided does not match the users code", HttpStatus.CONFLICT);
+		
+	}
+	 
+	
+	@PostMapping("/email/verify")
+	public AppUser verifyEmail(@RequestBody LinkedHashMap<String, String> body ) {
+		
+		Long code = Long.parseLong(body.get("code"));
+		
+		String username = body.get("username");
+		
+		return userSevice.verifyEmail(username, code);
+		
+	}
+	
+	/*  update password and Exception handler **/
+	@PutMapping("/update/password")
+	public AppUser updatePassword(@RequestBody LinkedHashMap<String, String> body) {
+		String username = body.get("username");
+		String password = body.get("password");
+		
+		
+		
+		return userSevice.setPassword(username, password);
+	}
+
+	
+	
 
 }

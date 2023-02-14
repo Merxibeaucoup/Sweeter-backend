@@ -3,10 +3,12 @@ package com.edgar.sweeter.services;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.edgar.sweeter.exceptions.EmailAlreadyTakenException;
 import com.edgar.sweeter.exceptions.EmailFailedToSendException;
+import com.edgar.sweeter.exceptions.IncorrectVerificationCodeException;
 import com.edgar.sweeter.exceptions.UserDoesNotExistException;
 import com.edgar.sweeter.models.AppUser;
 import com.edgar.sweeter.models.RegistrationObject;
@@ -20,16 +22,21 @@ public class UserService {
 	@Autowired
 	private  UserRepository userRepo;
 	
-	
 	@Autowired
 	private  RoleRepository roleRepo;
 	
 	@Autowired
 	private MailService mailService;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	
-	/* get User by name*/
+	
+	
+	
+	/* get User by name **/
+	
 	public AppUser getUserByUsername(String username) {
 		return userRepo.findByUsername(username).orElseThrow(UserDoesNotExistException::new);
 		
@@ -37,7 +44,8 @@ public class UserService {
 	
 	
 	
-	/* update User*/	
+	/* update User **/
+	
 	public AppUser updateUser(AppUser user) {
 		
 		try {
@@ -51,7 +59,8 @@ public class UserService {
 		
 	}
 	
-	/* Register User*/
+	/* Register User **/
+	
 	public AppUser RegisterUser(RegistrationObject ro) {
 		
 		AppUser user = new AppUser();
@@ -65,7 +74,9 @@ public class UserService {
 		
 		/* concat firstname(1 letter) and lastname , then add random numbers to then end */
 		String name = user
-						.getFirstName().substring(0,1).concat(user.getLastName());
+						.getFirstName()
+						.substring(0,1)
+						.concat(user.getLastName());
 						
 		
 				
@@ -88,7 +99,8 @@ public class UserService {
 		user.setUsername(tempName);
 		
 		
-		/* Set default roles as USER then assign to all users during registration*/
+		/* Set default roles as USER then assign to all users during registration  **/
+		
 		Set<Role> roles = user.getAuthorities();
 		roles.add(roleRepo.findByAuthority("USER").get());		
 		user.setAuthorities(roles);
@@ -104,6 +116,7 @@ public class UserService {
 	
 	
 	
+	/* Generate verification code  **/
 	
 	public void generateEmailVerification(String username) {
 		AppUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistException::new);
@@ -125,6 +138,39 @@ public class UserService {
 	
 	
 	
+	/* Email verification block  **/
+	
+	public AppUser verifyEmail(String username, Long code) {
+		AppUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistException::new);
+		
+		if(code.equals(user.getVerification())) {
+			user.setEnabled(true);
+			user.setVerification(null);
+			return userRepo.save(user);
+		} else {
+			throw new IncorrectVerificationCodeException();
+		}
+
+		
+		
+	}
+	
+	
+	/* Encode password and save to DB **/
+	
+	public AppUser setPassword(String username, String password) {
+		AppUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistException::new);
+		
+		String encodedPassword = passwordEncoder.encode(password);
+		
+		user.setPassword(encodedPassword);
+		
+		return userRepo.save(user);
+	}
+	
+	
+	/* Generate random  number for verification code **/
+	
 	private Long generateVerificationNumber() {
 		// TODO Auto-generated method stub
 		return  (long)Math.floor(Math.random() * 100_000_000);
@@ -133,12 +179,21 @@ public class UserService {
 
 
 	/* generate Username*/
+	
 	private String generateUsername(String name) {
 		
 		long generatedNumber = (long)Math.floor(Math.random() * 1_000_000_000);
 	return	  name + generatedNumber;
 	
 	}
+
+
+
+	
+
+
+
+	
 
 
 
